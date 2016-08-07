@@ -23,5 +23,5 @@ android:
     #min sdk emulator
     - sys-img-armeabi-v7a-android-17
 
-after_success:
+script:
     ./gradlew assDebug
