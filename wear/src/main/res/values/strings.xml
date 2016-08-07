@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">ConnectWithWearApp</string>
+    <string name="hello_world">Hello World!</string>
+    <string name="send_to_phone">send to phone</string>
+</resources>
