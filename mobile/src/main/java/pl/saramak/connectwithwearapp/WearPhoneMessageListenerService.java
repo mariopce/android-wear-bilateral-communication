@@ -11,7 +11,7 @@ import pl.saramak.connectwithwearapp.MainActivity;
  * Created by mario on 06.08.16.
  */
 public class WearPhoneMessageListenerService extends WearableListenerService {
-    private static final String START_ACTIVITY = "/start_activity";
+    private static final String START_ACTIVITY = "/start_phone_activity";
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
         if( messageEvent.getPath().equalsIgnoreCase( START_ACTIVITY ) ) {

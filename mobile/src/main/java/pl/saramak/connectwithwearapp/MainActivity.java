@@ -1,5 +1,6 @@
 package pl.saramak.connectwithwearapp;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -9,11 +10,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.PendingResults;
+import com.google.android.gms.common.api.Result;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.ResultTransform;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
+
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, MessageApi.MessageListener {
 
@@ -36,7 +44,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendMessage(WEAR_MESSAGE_PATH, "mes " + i++);
+                sendAsyncMessage(WEAR_MESSAGE_PATH, "mes " + i++);
             }
         });
         initGoogleApiClient();
@@ -53,15 +61,43 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                             mApiClient, node.getId(), path, message.getBytes() ).await();
                 }
 
-                runOnUiThread( new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(getApplicationContext(), "message send " + message, Toast.LENGTH_SHORT).show();
-                    }
-                });
+                showToastMT(message);
             }
         }).start();
     }
+
+    private void sendAsyncMessage(final String path, final String message) {
+
+        Wearable.NodeApi.getConnectedNodes( mApiClient ).setResultCallback(new ResultCallback<NodeApi.GetConnectedNodesResult>() {
+            @Override
+            public void onResult(@NonNull NodeApi.GetConnectedNodesResult nodes) {
+                for(Node node : nodes.getNodes()) {
+                    Wearable.MessageApi.sendMessage(
+                            mApiClient, node.getId(), path, message.getBytes() ).setResultCallback(new ResultCallback<MessageApi.SendMessageResult>() {
+                        @Override
+                        public void onResult(@NonNull MessageApi.SendMessageResult sendMessageResult) {
+                            if (sendMessageResult.getStatus().isSuccess()){
+                                showToastMT(message);
+                            }
+                        }
+                    });
+                }
+               
+            }
+        });
+
+
+    }
+
+    private void showToastMT(final String message) {
+        runOnUiThread( new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getApplicationContext(), "message send " + message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
 
     private void initGoogleApiClient() {
         mApiClient = new GoogleApiClient.Builder( this )
@@ -82,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        sendMessage(START_ACTIVITY, "");
+        sendAsyncMessage(START_ACTIVITY, "");
         Wearable.MessageApi.addListener( mApiClient, this );
     }
 

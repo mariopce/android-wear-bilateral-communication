@@ -28,6 +28,7 @@ public class WearActivity extends WearableActivity implements MessageApi.Message
 
     private static final String WEAR_MESSAGE_PATH = "/message";
     private static final String PHONE_MESSAGE_PATH = "/pmessage";
+    private static final String START_PHONE_ACTIVITY = "/start_phone_activity";
 
     private BoxInsetLayout mContainerView;
     private TextView mTextView;
@@ -65,7 +66,6 @@ public class WearActivity extends WearableActivity implements MessageApi.Message
     }
 
     private void sendMessage(final String path, final String message) {
-        //sendMessage(START_ACTIVITY, "");
         new Thread( new Runnable() {
             @Override
             public void run() {
@@ -145,7 +145,7 @@ public class WearActivity extends WearableActivity implements MessageApi.Message
     private static final String START_ACTIVITY = "/start_activity";
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-
+        sendMessage(START_PHONE_ACTIVITY, "");
         Wearable.MessageApi.addListener( mApiClient, this );
     }
 
